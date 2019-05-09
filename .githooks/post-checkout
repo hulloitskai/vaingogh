@@ -1,0 +1,14 @@
+#!/bin/sh
+
+## Install dependencies.
+install() {
+  echo # visual separator
+
+  if ! command -v make >/dev/null 2>&1; then
+    echo "Could not download dependencies with 'make install'; GNU make not found." >&2
+    return 1
+  fi
+
+  make install || return $?
+}
+install || exit $?

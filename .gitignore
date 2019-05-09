@@ -1,0 +1,51 @@
+# [Repository]
+debug
+.env.local
+vaingogh.yaml
+
+# Secrets:
+.gitsecret/keys/random_seed
+.env
+
+# Compiled binaries:
+/dist/
+
+
+# [Go]
+# Binaries for programs and plugins:
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`.
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE.
+*.out
+
+# Vendored packages.
+vendor/
+
+
+# [IDEs]
+# VSCode (keeping workspace configurations):
+.vscode/*
+!.vscode/tasks.json
+!.vscode/extensions.json
+#!.vscode/settings.json
+#!.vscode/launch.json
+
+# IntelliJ:
+.idea/
+
+
+# [System Files]
+# macOS:
+.DS_Store
+.DS_Store?
+*.swp
+
+# Windows:
+Thumbs.db

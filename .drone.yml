@@ -1,0 +1,52 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: install
+    image: golang:1.12
+    commands: ["go mod download"]
+
+  - name: lint
+    image: stevenxie/revive
+    commands: ["revive -config .revive.toml ./..."]
+
+  - name: info
+    image: alpine/git
+    commands:
+      - git describe --tags 2> /dev/null | cut -c 2- > /info/version
+      - git rev-parse HEAD 2> /dev/null > /info/commit
+      - git rev-parse --abbrev-ref HEAD 2> /dev/null > /info/branch
+      - head -1 < go.mod | awk '{print $2}' 2> /dev/null > /info/module
+      - tail -n +1 /info/*
+    volumes:
+      - name: info
+        path: /info
+
+  - name: build_binary
+    image: golang:1.12
+    commands:
+      - export MOD="$(cat /info/module)"
+      - |
+        [ -s /info/version ] && \
+          export VER="$(cat /info/version)" || \
+          export VER="$(cat /info/commit)"
+      - export LDFLAGS="-X ${MOD}/internal/info.Version=${VER}"
+      - go test -ldflags "$LDFLAGS" -race ./...
+      - go build -ldflags "$LDFLAGS" ./cmd/vaingogh
+    volumes:
+      - name: info
+        path: /info
+
+  - name: build_image
+    image: stevenxie/kaniko-drone
+    settings:
+      repo: stevenxie/vaingogh
+      tags: latest
+      username: stevenxie
+      password:
+        from_secret: docker_pass
+
+
+volumes:
+  - name: info
+    temp: {}

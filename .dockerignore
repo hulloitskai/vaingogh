@@ -1,0 +1,43 @@
+# [Repository]
+# Secrets:
+.env
+.env.local
+
+
+# [Go]
+/dist/
+coverage.out
+
+
+# [Git]
+.githooks/
+.gitignore
+
+# git-secret:
+.gitsecret/
+*.secret
+
+
+# [Docker]
+.dockerignore
+
+
+# [Miscellaneous]
+.editorconfig
+README.md
+
+
+# [System Files]
+# macOS:
+.DS_Store
+.DS_Store?
+*.swp
+
+# Windows:
+Thumbs.db
+
+# VSCode
+.vscode/*
+
+# IntelliJ
+.idea/
