@@ -115,8 +115,7 @@ go-lint:
 	 fi && \
 	 if command -v revive > /dev/null; then \
 	   echo "Linting code with 'revive'..." && \
-	   revive -config .revive.toml ./... && \
-	   echo done; \
+	   revive -config .revive.toml ./...; EXIT="$$((EXIT | $$?))"; \
 	 elif command -v golint > /dev/null; then \
 	   echo "Linting code with 'golint'..." && \
 	   golint -set_exit_status ./...; EXIT="$$((EXIT | $$?))"; \

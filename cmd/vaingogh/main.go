@@ -1,42 +1,78 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"os"
+	"strings"
 
+	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	"github.com/spf13/cobra"
 	ess "github.com/unixpickle/essentials"
 
 	"github.com/stevenxie/vaingogh/config"
+	"github.com/stevenxie/vaingogh/imports"
+	"github.com/stevenxie/vaingogh/internal/info"
+)
+
+var (
+	app = &cobra.Command{
+		Use:     info.Namespace,
+		Short:   info.Namespace + " is a vanity URL generator for your Go modules.",
+		Version: info.Version,
+	}
+
+	logger = buildLogger()
 )
 
 func main() {
-	// Load and validate config file.
-	cfg, err := config.Load()
-	if err != nil {
-		ess.Die("Reading config:", err)
-	}
-	if err = cfg.Validate(); err != nil {
-		ess.Die("Validating config:", err)
-	}
+	// Initialization.
+	prepareEnv()
+	configureApp()
 
-	// Build watcher.
-	var (
-		lister  = cfg.GithubRepoLister()
-		watcher = cfg.RepoWatcher(lister)
-	)
+	if err := app.Execute(); err != nil {
+		os.Exit(1)
+	}
+}
 
-	// Run watcher.
-	go func() {
-		if err := watcher.Run(); err != nil {
-			ess.Die("Running watcher:", err)
+// prepareEnv loads envvars from .env files.
+func prepareEnv() {
+	if err := godotenv.Load(".env", ".env.local"); err != nil {
+		if !strings.Contains( // unknown error
+			err.Error(),
+			"no such file or directory",
+		) {
+			ess.Die("Error reading '.env' file:", err)
 		}
-	}()
-
-	time.Sleep(12 * time.Second)
-
-	// List repositories.
-	fmt.Println("Repositories:")
-	for _, repo := range watcher.Repos() {
-		fmt.Printf("\t%s\n", repo)
 	}
+}
+
+func configureApp() {
+	app.AddCommand(reposCmd)
+	app.AddCommand(completionCmd)
+
+	// Disable help command.
+	app.SetHelpCommand(&cobra.Command{
+		Use:    "no-help",
+		Hidden: true,
+	})
+}
+
+// buildLogger builds an application-level zerolog.Logger.
+func buildLogger() zerolog.Logger {
+	var logger zerolog.Logger
+	if os.Getenv("GOENV") == "production" {
+		logger = zerolog.New(os.Stdout)
+	} else {
+		logger = zerolog.New(zerolog.NewConsoleWriter())
+	}
+	return logger.With().Timestamp().Logger()
+}
+
+func buildWatcher(cfg *config.Config, l zerolog.Logger) *imports.RepoWatcher {
+	var (
+		lister  = cfg.BuildGithubRepoLister()
+		watcher = cfg.BuildRepoWatcher(lister)
+	)
+	watcher.SetLogger(l.With().Str("component", "watcher").Logger())
+	return watcher
 }

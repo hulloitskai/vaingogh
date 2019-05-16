@@ -1,10 +1,12 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
 	errors "golang.org/x/xerrors"
 )
 
@@ -19,6 +21,8 @@ type RepoLister struct {
 	httpc    *http.Client
 	username string
 	isOrg    bool
+
+	concurrency int
 }
 
 // NewRepoLister creates a new RepoLister that lists repositories for the
@@ -29,8 +33,9 @@ type RepoLister struct {
 // appropriate endpoint.
 func NewRepoLister(username string) *RepoLister {
 	return &RepoLister{
-		httpc:    http.DefaultClient,
-		username: username,
+		httpc:       http.DefaultClient,
+		username:    username,
+		concurrency: 5,
 	}
 }
 
@@ -41,8 +46,14 @@ func (rl *RepoLister) SetIsOrg(isOrg bool) { rl.isOrg = isOrg }
 // SetHTTPClient sets the RepoLister's internal http.Client.
 func (rl *RepoLister) SetHTTPClient(hc *http.Client) { rl.httpc = hc }
 
+// SetConcurrency sets the concurrency at which RepoLister will make network
+// requests.
+func (rl *RepoLister) SetConcurrency(concurrency int) {
+	rl.concurrency = concurrency
+}
+
 //revive:disable-line
-func (rl *RepoLister) ListRepoNames() ([]string, error) {
+func (rl *RepoLister) ListGoRepos() ([]string, error) {
 	base := usersURL
 	if rl.isOrg {
 		base = orgsURL
@@ -68,27 +79,53 @@ func (rl *RepoLister) ListRepoNames() ([]string, error) {
 		return nil, errors.Errorf("github: closing response body: %w", err)
 	}
 
-	names := make([]string, 0, len(repos))
+	// Init channels.
+	var (
+		jobs    = make(chan langCheckJob)
+		results = make(chan langCheckResult, len(repos))
+	)
+
+	// Start min(len(repos), rl.concurrency) workers.
+	var (
+		numWorkers      = rl.concurrency
+		group, groupctx = errgroup.WithContext(context.Background())
+	)
+	if len(repos) < numWorkers {
+		numWorkers = len(repos)
+	}
+	for i := 0; i < numWorkers; i++ {
+		group.Go(func() error {
+			return rl.langCheckWorker(groupctx, jobs, results)
+		})
+	}
+
+	// Give workers jobs.
+	// This will block if there are fewer workers than jobs.
 	for _, repo := range repos {
-		// Filter only repos that have Go in it.
-		if res, err = rl.httpc.Get(repo.LanguagesURL); err != nil {
-			return nil, errors.Errorf(
-				"github: get languages for '%s': %w",
-				repo.FullName,
-				err,
-			)
-		}
+		jobs <- langCheckJob{Repo: repo.FullName, LangURL: repo.LanguagesURL}
+	}
+	close(jobs)
 
-		dec = json.NewDecoder(res.Body)
-		var langs map[string]int
-		if err = dec.Decode(&langs); err != nil {
-			return nil, errors.Errorf("github: decoding respose as JSON: %w", err)
-		}
-		if _, ok := langs["Go"]; !ok {
-			continue
-		}
+	// Wait for workers to finish.
+	if err = group.Wait(); err != nil {
+		return nil, errors.Errorf("github: checking repo languages: %w", err)
+	}
+	close(results)
 
-		names = append(names, "github.com/"+repo.FullName)
+	// Ensure all jobs were acknowledged.
+	if len(results) != len(repos) {
+		return nil, errors.Errorf(
+			"github: requested language checks for %d repos, but got %d results",
+			len(repos), len(results),
+		)
+	}
+
+	// Build repository names list.
+	names := make([]string, 0, len(repos))
+	for result := range results {
+		if result.HasGo {
+			names = append(names, result.Repo)
+		}
 	}
 	return names, nil
 }

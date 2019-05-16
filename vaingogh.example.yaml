@@ -1,0 +1,7 @@
+# Application options:
+checkInterval: 1h  # update repo list every hour
+
+# GitHub repo lister config:
+github:
+  username: stevenxie  # username
+  concurrency: 10      # maximum parallel network requests

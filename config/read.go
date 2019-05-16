@@ -26,9 +26,9 @@ func ReadFrom(r io.Reader) (*Config, error) {
 }
 
 func readFromEnv() (*Config, error) {
-	cfg := defaultConfig
+	cfg := defaultConfig()
 	if err := envconfig.Process("github", &cfg.Github); err != nil {
 		return nil, err
 	}
-	return &cfg, nil
+	return cfg, nil
 }
