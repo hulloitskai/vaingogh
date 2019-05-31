@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Install dependencies.
+# Install dependencies.
 install() {
   echo # visual separator
 
