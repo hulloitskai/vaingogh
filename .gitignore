@@ -1,4 +1,6 @@
-# [Repository]
+##
+## REPO
+##
 debug
 .env.local
 vaingogh.yaml
@@ -11,7 +13,9 @@ vaingogh.yaml
 /dist/
 
 
-# [Go]
+##
+## GO
+##
 # Binaries for programs and plugins:
 *.exe
 *.exe~
@@ -29,7 +33,9 @@ vaingogh.yaml
 vendor/
 
 
-# [IDEs]
+##
+## IDE
+##
 # VSCode (keeping workspace configurations):
 .vscode/*
 !.vscode/tasks.json
@@ -41,7 +47,9 @@ vendor/
 .idea/
 
 
-# [System Files]
+##
+## SYS
+##
 # macOS:
 .DS_Store
 .DS_Store?

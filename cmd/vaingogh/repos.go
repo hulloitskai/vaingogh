@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/cockroachdb/errors"
 	"github.com/spf13/cobra"
 
-	errors "golang.org/x/xerrors"
-
 	"github.com/stevenxie/vaingogh/config"
+	"github.com/stevenxie/vaingogh/repo"
+	"github.com/stevenxie/vaingogh/repo/github"
 )
 
 var reposCmd = &cobra.Command{
@@ -22,14 +23,30 @@ func execRepos(*cobra.Command, []string) error {
 	// Load and validate config file.
 	cfg, err := config.Load()
 	if err != nil {
-		return errors.Errorf("loading config: %w", err)
+		return errors.Wrap(err, "loading config")
 	}
 	if err = cfg.Validate(); err != nil {
-		return errors.Errorf("invalid config: %w", err)
+		return errors.Wrap(err, "invalid config")
 	}
 
 	// Build and run repo lister.
-	lister := cfg.BuildGithubRepoLister()
+	var lister repo.GoLister
+	{
+		client, err := github.NewClient()
+		if err != nil {
+			return errors.Wrap(err, "creating GitHub client")
+		}
+
+		cfg := cfg.GitHub
+		lister = github.NewGoLister(
+			client,
+			cfg.Username,
+			func(glc *github.GoListerConfig) {
+				glc.Concurrency = cfg.Lister.Concurrency
+			},
+		)
+	}
+
 	repos, err := lister.ListGoRepos()
 	if err != nil {
 		return err

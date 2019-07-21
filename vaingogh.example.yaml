@@ -1,7 +1,11 @@
-# Application options:
-checkInterval: 1h  # update repo list every hour
+# Watcher options:
+watcher:
+  checkInterval: Duration
 
-# GitHub repo lister config:
+# GitHub options:
 github:
-  username: stevenxie  # username
-  concurrency: 10      # maximum parallel network requests
+  username: String
+
+  # Repository lister options.
+  lister:
+    concurrency: 10

@@ -1,4 +1,6 @@
-# ----- VARIABLES -----
+##
+## VARIABLES
+##
 # Program version.
 __TAG = $(shell git describe --tags 2> /dev/null)
 ifneq ($(__TAG),)
@@ -21,7 +23,9 @@ GOENV        ?= development
 GODEFAULTCMD =  vaingogh
 
 
-# ----- TARGETS ------
+##
+## TARGETS
+##
 # Generic:
 .PHONY: default version setup install build clean run lint test review help
 __ARGS = $(filter-out $@,$(MAKECMDGOALS))
@@ -30,11 +34,11 @@ default: run
 version: # Show project version (derived from 'git describe').
 	@echo $(VERSION)
 
-setup: go-setup ## Set this project up on a new environment.
+setup: go-setup # Set this project up on a new environment.
 	@echo "Configuring githooks..." && \
 	 git config core.hooksPath .githooks && \
 	 echo done
-install: go-install ## Install project dependencies.
+install: go-install # Install project dependencies.
 
 run: # Run project (development).
 	$(eval __ARGS := $(if $(__ARGS),$(__ARGS),$(GODEFAULTCMD)))
@@ -45,7 +49,7 @@ build: # Build project.
 clean: # Clean build artifacts.
 	@$(MAKE) go-clean -- $(__ARGS)
 
-lint: go-lint ## Lint and check code.
+lint: go-lint # Lint and check code.
 test: # Run tests.
 	@$(MAKE) go-test -- $(__ARGS)
 review: # Lint code and run tests.

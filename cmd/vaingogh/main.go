@@ -2,15 +2,10 @@ package main
 
 import (
 	"os"
-	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	ess "github.com/unixpickle/essentials"
-
-	"github.com/stevenxie/vaingogh/config"
-	"github.com/stevenxie/vaingogh/imports"
+	"github.com/stevenxie/api/pkg/cmdutil"
 	"github.com/stevenxie/vaingogh/internal/info"
 )
 
@@ -21,28 +16,16 @@ var (
 		Version: info.Version,
 	}
 
-	logger = buildLogger()
+	log = buildLogger()
 )
 
 func main() {
-	// Initialization.
-	prepareEnv()
+	// Perform app initialization.
+	cmdutil.PrepareEnv()
 	configureApp()
 
 	if err := app.Execute(); err != nil {
 		os.Exit(1)
-	}
-}
-
-// prepareEnv loads envvars from .env files.
-func prepareEnv() {
-	if err := godotenv.Load(".env", ".env.local"); err != nil {
-		if !strings.Contains( // unknown error
-			err.Error(),
-			"no such file or directory",
-		) {
-			ess.Die("Error reading '.env' file:", err)
-		}
 	}
 }
 
@@ -66,13 +49,4 @@ func buildLogger() zerolog.Logger {
 		logger = zerolog.New(zerolog.NewConsoleWriter())
 	}
 	return logger.With().Timestamp().Logger()
-}
-
-func buildWatcher(cfg *config.Config, l zerolog.Logger) *imports.RepoWatcher {
-	var (
-		lister  = cfg.BuildGithubRepoLister()
-		watcher = cfg.BuildRepoWatcher(lister)
-	)
-	watcher.SetLogger(l.With().Str("component", "watcher").Logger())
-	return watcher
 }

@@ -1,15 +1,19 @@
-# [Repository]
-# Secrets:
+##
+## REPOSITORY
+##
 .env
 .env.local
 
 
-# [Go]
-/dist/
+##
+## GO
+##
 coverage.out
 
 
-# [Git]
+##
+## GIT
+##
 .githooks/
 .gitignore
 
@@ -18,16 +22,22 @@ coverage.out
 *.secret
 
 
-# [Docker]
+##
+## DOCKER
+##
 .dockerignore
 
 
-# [Miscellaneous]
+##
+## MISC
+##
 .editorconfig
 README.md
 
 
-# [System Files]
+##
+## SYS
+##
 # macOS:
 .DS_Store
 .DS_Store?
@@ -36,8 +46,8 @@ README.md
 # Windows:
 Thumbs.db
 
-# VSCode
+# VSCode:
 .vscode/*
 
-# IntelliJ
+# IntelliJ:
 .idea/

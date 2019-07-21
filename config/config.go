@@ -3,41 +3,48 @@ package config
 import (
 	"time"
 
-	errors "golang.org/x/xerrors"
+	"github.com/cockroachdb/errors"
 )
 
 // Config is used to configure vaingogh.
 type Config struct {
-	CheckInterval time.Duration `yaml:"checkInterval" split_words:"true"`
+	Watcher struct {
+		CheckInterval time.Duration `yaml:"checkInterval"`
+	} `yaml:"watcher"`
 
-	Github struct {
-		Username    string `yaml:"username"`
-		IsOrg       bool   `yaml:"isOrg"`
-		Token       string
-		Concurrency int `yaml:"concurrency"`
+	GitHub struct {
+		Username string `yaml:"username"`
+
+		Lister struct {
+			Concurrency int `yaml:"concurrency"`
+		} `yaml:"lister"`
 	} `yaml:"github"`
 }
 
 func defaultConfig() *Config {
 	cfg := new(Config)
-	cfg.CheckInterval = time.Hour
-	cfg.Github.Concurrency = 5
+	cfg.Watcher.CheckInterval = time.Hour
+	cfg.GitHub.Lister.Concurrency = 5
 	return cfg
 }
 
 // Validate returns an error if the Config is not valid.
 func (cfg *Config) Validate() error {
-	if cfg.CheckInterval <= 0 {
-		return errors.New("check interval must be positive (checkInterval)")
+	if cfg.Watcher.CheckInterval <= 0 {
+		return errors.New("Watcher check interval must be positive " +
+			"(watcher.checkInterval)")
 	}
 
-	gh := &cfg.Github
-	if gh.Username == "" {
-		return errors.New("GitHub username is required (github.username)")
-	}
-	if gh.Concurrency <= 0 {
-		return errors.New("GitHub lister concurrency must be positive " +
-			"(github.concurrency)")
+	// Validate Github credentials.
+	{
+		gh := &cfg.GitHub
+		if gh.Username == "" {
+			return errors.New("GitHub username is required (github.username)")
+		}
+		if gh.Lister.Concurrency <= 0 {
+			return errors.New("Lister concurrency must be positive " +
+				"(github.lister.concurrency)")
+		}
 	}
 	return nil
 }
