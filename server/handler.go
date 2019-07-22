@@ -1,19 +1,37 @@
 package server
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/cockroachdb/errors"
-
 	"github.com/sirupsen/logrus"
+	"github.com/stevenxie/vaingogh/internal/info"
+	serverinfo "github.com/stevenxie/vaingogh/server/internal/info"
 )
 
 func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var status int
 		if err := func() error {
+			// Respond with server info upon root path request.
+			if r.URL.Path == "/" {
+				w.Header().Set("Content-Type", "application/json")
+				err := json.NewEncoder(w).Encode(struct {
+					Name        string `json:"name"`
+					Version     string `json:"version"`
+					Environment string `json:"environment,omitempty"`
+				}{
+					Name:        serverinfo.Name,
+					Version:     info.Version,
+					Environment: os.Getenv("GOENV"),
+				})
+				return errors.Wrap(err, "encoding info response")
+			}
+
 			// Derive repo from URL.
 			address := r.Host + r.URL.Path
 			partial := strings.TrimPrefix(address, srv.baseURL)
