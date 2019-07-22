@@ -1,15 +1,16 @@
 # Server options:
 server:
   baseURL: String
+  shutdownTimeout: Duration
 
 # Watcher options:
 watcher:
   checkInterval: Duration
 
-# GitHub options:
-github:
-  username: String
+# Lister options:
+lister:
+  concurrency: Int
 
-  # Repository lister options:
-  lister:
-    concurrency: Int
+  # GitHub options:
+  github:
+    username: String

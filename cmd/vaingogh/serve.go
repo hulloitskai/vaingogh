@@ -58,12 +58,12 @@ func execServe(*cobra.Command, []string) error {
 		}
 
 		// Init service using GitHub client.
-		cfg := cfg.GitHub
+		cfg := cfg.Lister
 		lister = github.NewLister(
 			client,
-			cfg.Username,
+			cfg.GitHub.Username,
 			func(lc *github.ListerConfig) {
-				lc.Concurrency = cfg.Lister.Concurrency
+				lc.Concurrency = cfg.Concurrency
 			},
 		)
 	}

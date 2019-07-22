@@ -37,12 +37,12 @@ func execRepos(*cobra.Command, []string) error {
 			return errors.Wrap(err, "creating GitHub client")
 		}
 
-		cfg := cfg.GitHub
+		cfg := cfg.Lister
 		lister = github.NewLister(
 			client,
-			cfg.Username,
+			cfg.GitHub.Username,
 			func(glc *github.ListerConfig) {
-				glc.Concurrency = cfg.Lister.Concurrency
+				glc.Concurrency = cfg.Concurrency
 			},
 		)
 	}

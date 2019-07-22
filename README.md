@@ -8,6 +8,47 @@ _A vanity URL generator for your Go packages._
 [![GoDoc][godoc-img]][godoc]
 [![Microbadger][microbadger-img]][microbadger]
 
+## Usage
+
+```bash
+# Create a config file.
+$ cat <<EOF > config.yaml
+server:
+  baseURL: localhost:3000
+
+lister:
+  github:
+    username: stevenxie
+EOF
+
+# Run the server.
+$ docker run \
+  --rm \
+  -v $(PWD)/config.yaml:/etc/vaingogh/config.yaml \
+  -p 3000:3000 \
+  stevenxie/vaingogh
+
+# Try loading a repo page!
+$ curl http://localhost:3000/vaingogh
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="go-import" content="localhost:3000/vaingogh git https://github.com/stevenxie/vaingogh">
+    <meta name="go-source" content="localhost:3000/vaingogh https://github.com/stevenxie/vaingogh https://github.com/stevenxie/vaingogh/tree/master{/dir} https://github.com/stevenxie/vaingogh/blob/master{/dir}/{file}#L{line}">
+    <meta http-equiv="refresh" content="0; url=https://godoc.org/localhost:3000/vaingogh">
+  </head>
+  <body>
+    Nothing to see here; <a href="https://godoc.org/localhost:3000/vaingogh">move along</a>.
+  </body>
+</html>
+```
+
+Of course, none of these imports will actually work until you run this on an
+actual server behind a valid externally-reachable domain. Spin up a server and
+change the `server.baseURL` in the config to `go.${YOURDOMAIN}.com` or
+somethin', and try it out!
+
 [tag]: https://github.com/stevenxie/vaingogh/releases
 [tag-img]: https://img.shields.io/github/tag/stevenxie/vaingogh.svg
 [drone]: https://ci.stevenxie.me/stevenxie/vaingogh
@@ -16,5 +57,5 @@ _A vanity URL generator for your Go packages._
 [grp-img]: https://goreportcard.com/badge/github.com/stevenxie/vaingogh
 [godoc]: https://godoc.org/github.com/stevenxie/vaingogh
 [godoc-img]: https://godoc.org/github.com/stevenxie/vaingogh?status.svg
-[microbadger]: https://microbadger.com/images/stevenxie/vainvogh
+[microbadger]: https://microbadger.com/images/stevenxie/vaingogh
 [microbadger-img]: https://images.microbadger.com/badges/image/stevenxie/vaingogh.svg
