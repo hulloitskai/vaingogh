@@ -9,7 +9,8 @@ import (
 // Config is used to configure vaingogh.
 type Config struct {
 	Server struct {
-		BaseURL string `yaml:"baseURL"`
+		BaseURL         string         `yaml:"baseURL"`
+		ShutdownTimeout *time.Duration `yaml:"shutdownTimeout"`
 	} `yaml:"server"`
 
 	Watcher struct {
