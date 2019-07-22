@@ -13,9 +13,9 @@ import (
 )
 
 type (
-	// A GoLister can list GitHub repos that containn Go for a particular
+	// A Lister can list GitHub repos containing Go for a particular
 	// user / organization.
-	GoLister struct {
+	Lister struct {
 		client      *github.Client
 		concurrency int
 
@@ -24,28 +24,28 @@ type (
 		isOrg   bool
 	}
 
-	// A GoListerConfig configures a GoLister.
-	GoListerConfig struct {
+	// A ListerConfig configures a Service.
+	ListerConfig struct {
 		Concurrency int
 	}
 )
 
-var _ repo.GoLister = (*GoLister)(nil)
+var _ repo.ListerService = (*Lister)(nil)
 
-// NewGoLister creates a new GoLister that lists repositories for the
+// NewLister creates a new Service that lists repositories for the
 // specified user.
-func NewGoLister(
+func NewLister(
 	c *github.Client,
 	username string,
-	opts ...func(*GoListerConfig),
-) *GoLister {
-	cfg := GoListerConfig{
+	opts ...func(*ListerConfig),
+) *Lister {
+	cfg := ListerConfig{
 		Concurrency: 5,
 	}
 	for _, opt := range opts {
 		opt(&cfg)
 	}
-	return &GoLister{
+	return &Lister{
 		client:      c,
 		user:        username,
 		concurrency: cfg.Concurrency,
@@ -53,8 +53,8 @@ func NewGoLister(
 }
 
 // ListGoRepos lists all the repos that use Go.
-func (gl *GoLister) ListGoRepos() ([]string, error) {
-	if err := gl.checkUser(); err != nil {
+func (l *Lister) ListGoRepos() ([]string, error) {
+	if err := l.checkUser(); err != nil {
 		return nil, errors.Wrap(err, "github: checking user type")
 	}
 
@@ -62,16 +62,16 @@ func (gl *GoLister) ListGoRepos() ([]string, error) {
 		repos []*github.Repository
 		err   error
 	)
-	if gl.isOrg {
-		repos, _, err = gl.client.Repositories.ListByOrg(
+	if l.isOrg {
+		repos, _, err = l.client.Repositories.ListByOrg(
 			context.Background(),
-			gl.user,
+			l.user,
 			&github.RepositoryListByOrgOptions{Type: "public"},
 		)
 	} else {
-		repos, _, err = gl.client.Repositories.List(
+		repos, _, err = l.client.Repositories.List(
 			context.Background(),
-			gl.user,
+			l.user,
 			&github.RepositoryListOptions{
 				Visibility:  "public",
 				Affiliation: "owner",
@@ -91,7 +91,7 @@ func (gl *GoLister) ListGoRepos() ([]string, error) {
 
 	// Start min(len(repos), rl.concurrency) workers.
 	var (
-		numWorkers      = gl.concurrency
+		numWorkers      = l.concurrency
 		group, groupctx = errgroup.WithContext(context.Background())
 	)
 	if len(repos) < numWorkers {
@@ -99,7 +99,7 @@ func (gl *GoLister) ListGoRepos() ([]string, error) {
 	}
 	for i := 0; i < numWorkers; i++ {
 		group.Go(func() error {
-			return gl.langCheckWorker(groupctx, jobs, results)
+			return l.langCheckWorker(groupctx, jobs, results)
 		})
 	}
 

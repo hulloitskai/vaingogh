@@ -6,13 +6,13 @@ import (
 	"github.com/cockroachdb/errors"
 )
 
-func (gl *GoLister) checkUser() error {
-	if gl.checked {
+func (l *Lister) checkUser() error {
+	if l.checked {
 		return nil
 	}
 
 	{
-		user, _, err := gl.client.Users.Get(context.Background(), gl.user)
+		user, _, err := l.client.Users.Get(context.Background(), l.user)
 		if err != nil {
 			return errors.Wrap(err, "getting user details")
 		}
@@ -22,12 +22,12 @@ func (gl *GoLister) checkUser() error {
 	}
 
 	{
-		org, _, err := gl.client.Organizations.Get(context.Background(), gl.user)
+		org, _, err := l.client.Organizations.Get(context.Background(), l.user)
 		if err != nil {
 			return errors.Wrap(err, "getting org details")
 		}
 		if org != nil {
-			gl.isOrg = true
+			l.isOrg = true
 			goto Checked
 		}
 	}
@@ -35,7 +35,7 @@ func (gl *GoLister) checkUser() error {
 	return ErrUserNotExists
 
 Checked:
-	gl.checked = true
+	l.checked = true
 	return nil
 }
 

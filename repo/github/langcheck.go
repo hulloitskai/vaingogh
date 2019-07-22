@@ -12,7 +12,7 @@ type langCheckResult struct {
 	HasGo bool
 }
 
-func (gl *GoLister) langCheckWorker(
+func (l *Lister) langCheckWorker(
 	ctx context.Context,
 	repos <-chan *github.Repository,
 	results chan<- langCheckResult,
@@ -20,7 +20,7 @@ func (gl *GoLister) langCheckWorker(
 	for repo := range repos {
 		// Make request with the worker context, so that it will be cancelled if the
 		// worker context is cancelled.
-		languages, _, err := gl.client.Repositories.ListLanguages(
+		languages, _, err := l.client.Repositories.ListLanguages(
 			ctx,
 			repo.GetOwner().GetLogin(),
 			repo.GetName(),

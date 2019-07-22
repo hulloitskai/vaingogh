@@ -1,5 +1,8 @@
 FROM alpine:3.9
 
+# Install system dependencies.
+RUN apk add --update ca-certificates
+
 # Copy built binary.
 ENV PROGRAM=vaingogh
 COPY ./dist/${PROGRAM} /bin/${PROGRAM}
@@ -8,4 +11,4 @@ COPY ./dist/${PROGRAM} /bin/${PROGRAM}
 ENV GOENV=production
 EXPOSE 3000
 
-ENTRYPOINT $PROGRAM
+ENTRYPOINT $PROGRAM serve

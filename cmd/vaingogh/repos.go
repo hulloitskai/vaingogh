@@ -29,8 +29,8 @@ func execRepos(*cobra.Command, []string) error {
 		return errors.Wrap(err, "invalid config")
 	}
 
-	// Build and run repo lister.
-	var lister repo.GoLister
+	// Build repo service.
+	var lister repo.ListerService
 	{
 		client, err := github.NewClient()
 		if err != nil {
@@ -38,10 +38,10 @@ func execRepos(*cobra.Command, []string) error {
 		}
 
 		cfg := cfg.GitHub
-		lister = github.NewGoLister(
+		lister = github.NewLister(
 			client,
 			cfg.Username,
-			func(glc *github.GoListerConfig) {
+			func(glc *github.ListerConfig) {
 				glc.Concurrency = cfg.Lister.Concurrency
 			},
 		)

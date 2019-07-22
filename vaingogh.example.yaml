@@ -1,3 +1,7 @@
+# Server options:
+server:
+  baseURL: String
+
 # Watcher options:
 watcher:
   checkInterval: Duration
@@ -6,6 +10,6 @@ watcher:
 github:
   username: String
 
-  # Repository lister options.
+  # Repository lister options:
   lister:
-    concurrency: 10
+    concurrency: Int

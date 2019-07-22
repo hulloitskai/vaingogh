@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/rs/zerolog"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/stevenxie/api/pkg/cmdutil"
 	"github.com/stevenxie/vaingogh/internal/info"
@@ -19,18 +19,9 @@ var (
 	log = buildLogger()
 )
 
-func main() {
-	// Perform app initialization.
-	cmdutil.PrepareEnv()
-	configureApp()
-
-	if err := app.Execute(); err != nil {
-		os.Exit(1)
-	}
-}
-
-func configureApp() {
+func init() {
 	app.AddCommand(reposCmd)
+	app.AddCommand(serveCmd)
 	app.AddCommand(completionCmd)
 
 	// Disable help command.
@@ -40,13 +31,22 @@ func configureApp() {
 	})
 }
 
-// buildLogger builds an application-level zerolog.Logger.
-func buildLogger() zerolog.Logger {
-	var logger zerolog.Logger
-	if os.Getenv("GOENV") == "production" {
-		logger = zerolog.New(os.Stdout)
-	} else {
-		logger = zerolog.New(zerolog.NewConsoleWriter())
+func main() {
+	cmdutil.PrepareEnv()
+	if err := app.Execute(); err != nil {
+		os.Exit(1)
 	}
-	return logger.With().Timestamp().Logger()
+}
+
+// buildLogger builds an application-level logger, which also captures errors
+// using Sentry.
+func buildLogger() *logrus.Logger {
+	log := logrus.New()
+	log.SetOutput(os.Stdout)
+
+	// Set logger level.
+	if os.Getenv("GOENV") == "development" {
+		log.SetLevel(logrus.DebugLevel)
+	}
+	return log
 }
