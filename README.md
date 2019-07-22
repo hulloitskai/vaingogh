@@ -23,13 +23,15 @@ EOF
 
 # Run the server.
 $ docker run \
-  --rm \
-  -v $(PWD)/config.yaml:/etc/vaingogh/config.yaml \
-  -p 3000:3000 \
-  stevenxie/vaingogh
+    --rm \
+    -v $(PWD)/config.yaml:/etc/vaingogh/config.yaml \
+    -p 3000:3000 \
+    stevenxie/vaingogh
 
 # Try loading a repo page!
 $ curl http://localhost:3000/vaingogh
+
+# (response)
 <!DOCTYPE html>
 <html>
   <head>
@@ -48,6 +50,24 @@ Of course, none of these imports will actually work until you run this on an
 actual server behind a valid externally-reachable domain. Spin up a server and
 change the `server.baseURL` in the config to `go.${YOURDOMAIN}.com` or
 somethin', and try it out!
+
+<br />
+
+### Authenticated Requests and Rate Limits
+
+In order to increase the rate of requests to the Github API (i.e. with a small
+enough `watcher.checkInterval`), authentication must be enabled.
+
+To enable authentication, ensure that the environment variable `GITHUB_TOKEN`
+is set with a
+[personal access token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line):
+
+```bash
+$ docker run \
+    -e GITHUB_TOKEN=... \
+    # ...other flags...
+    stevenxie/vaingogh
+```
 
 [tag]: https://github.com/stevenxie/vaingogh/releases
 [tag-img]: https://img.shields.io/github/tag/stevenxie/vaingogh.svg
