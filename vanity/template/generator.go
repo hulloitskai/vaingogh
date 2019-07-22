@@ -31,6 +31,7 @@ type (
 	// HTMLGeneratorContext contains data fields that can be used by HTMLGenerator
 	// templates.
 	HTMLGeneratorContext struct {
+		Prefix    string
 		Address   string
 		ImportURL string
 		SourceURL string
@@ -70,8 +71,10 @@ func NewHTMLGenerator(opts ...func(*HTMLGeneratorConfig)) (*HTMLGenerator,
 }
 
 // GenerateHTML generates an HTML page for a vanity import.
-func (gen *HTMLGenerator) GenerateHTML(address, repo string) (html string, err error) {
-	// Normalize address (strip protocol).
+func (gen *HTMLGenerator) GenerateHTML(prefix, address, repo string) (
+	html string, err error) {
+	// Normalize prefix and address (strip protocol).
+	prefix = urlutil.StripProtocol(prefix)
 	address = urlutil.StripProtocol(address)
 
 	// Protect internal values access.
@@ -80,6 +83,7 @@ func (gen *HTMLGenerator) GenerateHTML(address, repo string) (html string, err e
 
 	// Create context.
 	ctx := HTMLGeneratorContext{
+		Prefix:    prefix,
 		Address:   address,
 		ImportURL: gen.generateURL(gen.importURLPrefix, repo),
 		SourceURL: gen.generateURL(gen.sourceURLPrefix, repo),

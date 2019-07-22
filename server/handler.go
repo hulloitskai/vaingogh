@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -20,7 +21,9 @@ func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
 			// Respond with server info upon root path request.
 			if r.URL.Path == "/" {
 				w.Header().Set("Content-Type", "application/json")
-				err := json.NewEncoder(w).Encode(struct {
+				enc := json.NewEncoder(w)
+				enc.SetIndent("", "  ")
+				err := enc.Encode(struct {
 					Name        string `json:"name"`
 					Version     string `json:"version"`
 					Environment string `json:"environment,omitempty"`
@@ -32,11 +35,12 @@ func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
 				return errors.Wrap(err, "encoding info response")
 			}
 
-			// Derive repo from URL.
+			// Derive addresses / repo from URL.
 			address := r.Host + r.URL.Path
 			partial := strings.TrimPrefix(address, srv.baseURL)
-			partial = strings.Trim(partial, "/")
+			partial = strings.Split(partial, "/")[1]
 			repo := srv.validator.DeriveRepoFullName(partial)
+			prefix := fmt.Sprintf("%s/%s", srv.baseURL, partial)
 
 			// Ensure repository is valid.
 			valid, err := srv.validator.IsRepoValid(repo)
@@ -50,7 +54,7 @@ func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
 			}
 
 			// Generate HTML page.
-			html, err := srv.generator.GenerateHTML(address, repo)
+			html, err := srv.generator.GenerateHTML(prefix, address, repo)
 			if err != nil {
 				return errors.Wrap(err, "generating HTML")
 			}

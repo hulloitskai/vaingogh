@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stevenxie/api/pkg/zero"
@@ -47,6 +48,7 @@ func New(
 
 	// Normalize baseURL.
 	baseURL = urlutil.StripProtocol(baseURL)
+	baseURL = strings.Trim(baseURL, "/")
 
 	return &Server{
 		generator: generator,
