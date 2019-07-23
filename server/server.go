@@ -10,7 +10,7 @@ import (
 
 	"github.com/stevenxie/vaingogh/pkg/urlutil"
 	"github.com/stevenxie/vaingogh/repo"
-	"github.com/stevenxie/vaingogh/vanity"
+	"github.com/stevenxie/vaingogh/template"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 		httpsrv *http.Server
 		log     logrus.FieldLogger
 
-		generator vanity.HTMLGenerator
+		generator template.Generator
 		validator repo.ValidatorService
 		baseURL   string
 	}
@@ -33,7 +33,7 @@ type (
 
 // New creates a new Server.
 func New(
-	generator vanity.HTMLGenerator,
+	generator template.Generator,
 	validator repo.ValidatorService,
 	baseURL string,
 	opts ...func(*Config),

@@ -6,7 +6,6 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
-
 	"github.com/stevenxie/api/pkg/stream"
 	"github.com/stevenxie/api/pkg/zero"
 )
@@ -15,7 +14,7 @@ type (
 	// A Watcher caches and updates a list of repos at regular intervals.
 	// It is safe for concurrent use.
 	Watcher struct {
-		svc      ListerService
+		lister   ListerService
 		streamer stream.Streamer
 		log      logrus.FieldLogger
 
@@ -38,7 +37,7 @@ var (
 // NewWatcher creates a new Watcher, which keeps an updated list of
 // Go repositories, and checks for updates at regular intervals.
 func NewWatcher(
-	svc ListerService,
+	lister ListerService,
 	interval time.Duration,
 	opts ...func(*WatcherConfig),
 ) *Watcher {
@@ -49,10 +48,10 @@ func NewWatcher(
 		opt(&cfg)
 	}
 	w := &Watcher{
-		svc: svc,
+		lister: lister,
 		streamer: stream.NewPoller(
 			func() (zero.Interface, error) {
-				return svc.ListGoRepos()
+				return lister.ListGoRepos()
 			},
 			interval,
 		),
@@ -88,7 +87,7 @@ func (w *Watcher) IsRepoValid(repo string) (bool, error) {
 
 // DeriveRepoFullName derives the full name of a repo from a partial name.
 func (w *Watcher) DeriveRepoFullName(partial string) (repo string) {
-	return w.svc.DeriveRepoFullName(partial)
+	return w.lister.DeriveRepoFullName(partial)
 }
 
 func (w *Watcher) run() {

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -16,8 +17,8 @@ import (
 	"github.com/stevenxie/vaingogh/repo"
 	"github.com/stevenxie/vaingogh/repo/github"
 	"github.com/stevenxie/vaingogh/server"
-	"github.com/stevenxie/vaingogh/vanity"
-	"github.com/stevenxie/vaingogh/vanity/template"
+	"github.com/stevenxie/vaingogh/template"
+	tplgh "github.com/stevenxie/vaingogh/template/github"
 )
 
 var (
@@ -112,11 +113,11 @@ func execServe(*cobra.Command, []string) error {
 		})
 	}
 
-	// Build HTML generator.
-	var generator vanity.HTMLGenerator
+	// Build page generator.
+	var generator template.Generator
 	{
-		if generator, err = template.NewHTMLGenerator(); err != nil {
-			return errors.Wrap(err, "building HTML generator")
+		if generator, err = tplgh.NewGenerator(); err != nil {
+			return errors.Wrap(err, "building generator")
 		}
 	}
 
@@ -138,7 +139,10 @@ func execServe(*cobra.Command, []string) error {
 
 	// Start server on the specified port.
 	err = srv.ListenAndServe(fmt.Sprintf(":%d", serveOpts.Port))
-	return errors.Wrap(err, "starting server")
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return errors.Wrap(err, "starting server")
+	}
+	return nil
 }
 
 func shutdownServerUponInterrupt(

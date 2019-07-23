@@ -56,7 +56,7 @@ func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
 			// Generate HTML page.
 			html, err := srv.generator.GenerateHTML(prefix, address, repo)
 			if err != nil {
-				return errors.Wrap(err, "generating HTML")
+				return errors.Wrap(err, "generating HTML page")
 			}
 
 			// Send HTML response.
