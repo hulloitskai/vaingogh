@@ -8,6 +8,21 @@ _A vanity URL generator for your Go packages._
 [![GoDoc][godoc-img]][godoc]
 [![Microbadger][microbadger-img]][microbadger]
 
+## Introduction
+
+This is the lazy man's vanity Go URL generator—a fully-automatic, set-it-and-forget-it solution for people who don't want to have to update a
+static file every time they create a new Go repo.
+
+### How It Works
+
+`vaingogh` is a server that continually watches your GitHub account for
+an updated list of repos that contain Go. When a request is made to the server,
+a repo name is derived, and checked against the list of valid repos; if the
+check succeeds, a vanity imports page is generated (see [
+`template/default.go`](./template/default.go)) in order to handle both `go get`
+and user visits to that webpage (real users will be redirected to the
+[GoDoc](http://godoc.org)).
+
 ## Usage
 
 ```bash
@@ -50,8 +65,6 @@ Of course, none of these imports will actually work until you run this on an
 actual server behind a valid externally-reachable domain. Spin up a server and
 change the `server.baseURL` in the config to `go.${YOURDOMAIN}.com` or
 somethin', and try it out!
-
-<br />
 
 ### Authenticated Requests and Rate Limits
 
