@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	stderrs "errors"
 
 	"github.com/cockroachdb/errors"
 )
@@ -41,4 +42,4 @@ Checked:
 
 // ErrUserNotExists is returned by a RepoLister when it is unable to locate
 // either a user or organization with a given username.
-var ErrUserNotExists = errors.New("no such user or organization exists")
+var ErrUserNotExists = stderrs.New("no such user or organization exists")
