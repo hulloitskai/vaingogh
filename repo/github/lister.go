@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	stderrs "errors"
 	"fmt"
 
 	"github.com/cockroachdb/errors"
@@ -12,26 +13,6 @@ import (
 	"go.stevenxie.me/api/pkg/zero"
 	"go.stevenxie.me/vaingogh/repo"
 )
-
-type (
-	// A Lister can list GitHub repos containing Go for a particular
-	// user / organization.
-	Lister struct {
-		client      *github.Client
-		concurrency int
-
-		user    string
-		checked bool
-		isOrg   bool
-	}
-
-	// A ListerConfig configures a Lister.
-	ListerConfig struct {
-		Concurrency int
-	}
-)
-
-var _ repo.ListerService = (*Lister)(nil)
 
 // NewLister creates a new Lister that lists repositories for the
 // specified user.
@@ -52,6 +33,26 @@ func NewLister(
 		concurrency: cfg.Concurrency,
 	}
 }
+
+type (
+	// A Lister can list GitHub repos containing Go for a particular
+	// user / organization.
+	Lister struct {
+		client      *github.Client
+		concurrency int
+
+		user    string
+		checked bool
+		isOrg   bool
+	}
+
+	// A ListerConfig configures a Lister.
+	ListerConfig struct {
+		Concurrency int
+	}
+)
+
+var _ repo.ListerService = (*Lister)(nil)
 
 // ListGoRepos lists all the repos that use Go.
 func (l *Lister) ListGoRepos() ([]string, error) {
@@ -151,6 +152,40 @@ func (l *Lister) ListGoRepos() ([]string, error) {
 
 	return gorepos, nil
 }
+
+func (l *Lister) checkUser() error {
+	if l.checked {
+		return nil
+	}
+	{
+		user, _, err := l.client.Users.Get(context.Background(), l.user)
+		if err != nil {
+			return errors.Wrap(err, "getting user details")
+		}
+		if user != nil {
+			goto Checked
+		}
+	}
+	{
+		org, _, err := l.client.Organizations.Get(context.Background(), l.user)
+		if err != nil {
+			return errors.Wrap(err, "getting org details")
+		}
+		if org != nil {
+			l.isOrg = true
+			goto Checked
+		}
+	}
+	return ErrUserNotExists
+
+Checked:
+	l.checked = true
+	return nil
+}
+
+// ErrUserNotExists is returned by a RepoLister when it is unable to locate
+// either a user or organization with a given username.
+var ErrUserNotExists = stderrs.New("no such user or organization exists")
 
 // DeriveRepoFullName derives the full name of a repo from a partial name.
 func (l *Lister) DeriveRepoFullName(partial string) (repo string) {

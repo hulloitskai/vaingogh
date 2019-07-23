@@ -8,6 +8,24 @@ import (
 	"github.com/cockroachdb/errors"
 )
 
+// NewTemplator creates a new Templator. It is safe for concurrent use.
+func NewTemplator(opts ...func(*TemplatorConfig)) (*Templator, error) {
+	cfg := TemplatorConfig{
+		Template: defaultTemplate,
+	}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
+	// Parse template.
+	tpl, err := template.New("html").Parse(cfg.Template)
+	if err != nil {
+		return nil, errors.Wrap(err, "vanity: parsing HTML template")
+	}
+
+	return &Templator{tpl: tpl}, nil
+}
+
 type (
 	// A Templator generalizes the process for generating vanity import pages
 	// from a template.
@@ -36,24 +54,6 @@ type (
 		SourceBlobURL string
 	}
 )
-
-// NewTemplator creates a new Templator. It is safe for concurrent use.
-func NewTemplator(opts ...func(*TemplatorConfig)) (*Templator, error) {
-	cfg := TemplatorConfig{
-		Template: defaultTemplate,
-	}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-
-	// Parse template.
-	tpl, err := template.New("html").Parse(cfg.Template)
-	if err != nil {
-		return nil, errors.Wrap(err, "vanity: parsing HTML template")
-	}
-
-	return &Templator{tpl: tpl}, nil
-}
 
 // TemplateHTML generates an HTML page for a vanity import.
 func (tplr *Templator) TemplateHTML(data TemplatorData) (html string,

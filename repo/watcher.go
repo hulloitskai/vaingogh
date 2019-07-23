@@ -10,30 +10,6 @@ import (
 	"go.stevenxie.me/api/pkg/zero"
 )
 
-type (
-	// A Watcher caches and updates a list of repos at regular intervals.
-	// It is safe for concurrent use.
-	Watcher struct {
-		lister   ListerService
-		streamer stream.Streamer
-		log      logrus.FieldLogger
-
-		mux   sync.Mutex
-		repos []string
-		err   error
-	}
-
-	// A WatcherConfig configures a Watcher.
-	WatcherConfig struct {
-		Logger logrus.FieldLogger
-	}
-)
-
-var (
-	_ ListerService    = (*Watcher)(nil)
-	_ ValidatorService = (*Watcher)(nil)
-)
-
 // NewWatcher creates a new Watcher, which keeps an updated list of
 // Go repositories, and checks for updates at regular intervals.
 func NewWatcher(
@@ -60,6 +36,30 @@ func NewWatcher(
 	go w.run()
 	return w
 }
+
+type (
+	// A Watcher caches and updates a list of repos at regular intervals.
+	// It is safe for concurrent use.
+	Watcher struct {
+		lister   ListerService
+		streamer stream.Streamer
+		log      logrus.FieldLogger
+
+		mux   sync.Mutex
+		repos []string
+		err   error
+	}
+
+	// A WatcherConfig configures a Watcher.
+	WatcherConfig struct {
+		Logger logrus.FieldLogger
+	}
+)
+
+var (
+	_ ListerService    = (*Watcher)(nil)
+	_ ValidatorService = (*Watcher)(nil)
+)
 
 // ListGoRepos returns the last seen list of Go repos.
 func (w *Watcher) ListGoRepos() ([]string, error) {

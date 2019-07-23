@@ -13,11 +13,6 @@ import (
 // Namespace is the package namespace, used for things like envvars.
 const Namespace = "github"
 
-// ClientConfig configures a github.Client.
-type ClientConfig struct {
-	HTTPClient *http.Client
-}
-
 // NewClient creates a new GitHub client.
 //
 // If the environment contains a 'GITHUB_TOKEN' variable, then an authenticated
@@ -40,4 +35,9 @@ func NewClient(opts ...func(*ClientConfig)) (*github.Client, error) {
 	}
 
 	return github.NewClient(cfg.HTTPClient), nil
+}
+
+// ClientConfig configures a github.Client.
+type ClientConfig struct {
+	HTTPClient *http.Client
 }

@@ -13,24 +13,6 @@ import (
 	"go.stevenxie.me/vaingogh/template"
 )
 
-type (
-	// Server responds to vanity import URL requests.
-	Server struct {
-		httpsrv *http.Server
-		log     logrus.FieldLogger
-
-		generator template.Generator
-		validator repo.ValidatorService
-		baseURL   string
-	}
-
-	// Config configures a Server.
-	Config struct {
-		HTTPServer *http.Server
-		Logger     logrus.FieldLogger
-	}
-)
-
 // New creates a new Server.
 func New(
 	generator template.Generator,
@@ -58,6 +40,24 @@ func New(
 		baseURL:   baseURL,
 	}, nil
 }
+
+type (
+	// Server responds to vanity import URL requests.
+	Server struct {
+		httpsrv *http.Server
+		log     logrus.FieldLogger
+
+		generator template.Generator
+		validator repo.ValidatorService
+		baseURL   string
+	}
+
+	// Config configures a Server.
+	Config struct {
+		HTTPServer *http.Server
+		Logger     logrus.FieldLogger
+	}
+)
 
 // ListenAndServe listens and serves responses to network requests on the
 // specified address.
