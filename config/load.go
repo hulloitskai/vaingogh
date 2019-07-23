@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/stevenxie/api/pkg/configutil"
-	"github.com/stevenxie/vaingogh/internal/info"
+	"go.stevenxie.me/api/pkg/configutil"
+	"go.stevenxie.me/vaingogh/internal/info"
 )
 
 // DefaultFilepaths are paths to look for config files.

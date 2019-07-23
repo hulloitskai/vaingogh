@@ -1,4 +1,4 @@
-module github.com/stevenxie/vaingogh
+module go.stevenxie.me/vaingogh
 
 go 1.12
 
@@ -10,7 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.3 // indirect
-	github.com/stevenxie/api v1.3.4-0.20190722152731-c155e1f71592
+	go.stevenxie.me/api v1.3.4-0.20190723045055-597d4cc6a739
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45

@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/stevenxie/api/pkg/zero"
+	"go.stevenxie.me/api/pkg/zero"
 
-	"github.com/stevenxie/vaingogh/pkg/urlutil"
-	"github.com/stevenxie/vaingogh/repo"
-	"github.com/stevenxie/vaingogh/template"
+	"go.stevenxie.me/vaingogh/pkg/urlutil"
+	"go.stevenxie.me/vaingogh/repo"
+	"go.stevenxie.me/vaingogh/template"
 )
 
 type (
@@ -59,7 +59,7 @@ func New(
 	}, nil
 }
 
-// ListenAndServe listens and serves respones to network requests on the
+// ListenAndServe listens and serves responses to network requests on the
 // specified address.
 func (srv *Server) ListenAndServe(addr string) error {
 	var (

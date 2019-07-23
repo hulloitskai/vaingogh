@@ -11,14 +11,15 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/stevenxie/api/pkg/cmdutil"
 
-	"github.com/stevenxie/vaingogh/config"
-	"github.com/stevenxie/vaingogh/repo"
-	"github.com/stevenxie/vaingogh/repo/github"
-	"github.com/stevenxie/vaingogh/server"
-	"github.com/stevenxie/vaingogh/template"
-	tplgh "github.com/stevenxie/vaingogh/template/github"
+	"go.stevenxie.me/api/pkg/cmdutil"
+	"go.stevenxie.me/vaingogh/config"
+	"go.stevenxie.me/vaingogh/server"
+
+	"go.stevenxie.me/vaingogh/repo"
+	repogh "go.stevenxie.me/vaingogh/repo/github"
+	"go.stevenxie.me/vaingogh/template"
+	tplgh "go.stevenxie.me/vaingogh/template/github"
 )
 
 var (
@@ -77,17 +78,17 @@ func execServe(*cobra.Command, []string) error {
 	var lister repo.ListerService
 	{
 		// Initiate GitHub client.
-		client, err := github.NewClient()
+		client, err := repogh.NewClient()
 		if err != nil {
 			return errors.Wrap(err, "creating GitHub client")
 		}
 
 		// Init service using GitHub client.
 		cfg := cfg.Lister
-		lister = github.NewLister(
+		lister = repogh.NewLister(
 			client,
 			cfg.GitHub.Username,
-			func(lc *github.ListerConfig) {
+			func(lc *repogh.ListerConfig) {
 				lc.Concurrency = cfg.Concurrency
 			},
 		)

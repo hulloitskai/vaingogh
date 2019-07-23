@@ -6,8 +6,8 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stevenxie/api/pkg/stream"
-	"github.com/stevenxie/api/pkg/zero"
+	"go.stevenxie.me/api/pkg/stream"
+	"go.stevenxie.me/api/pkg/zero"
 )
 
 type (

@@ -3,9 +3,9 @@ package github
 import (
 	"context"
 
-	"github.com/stevenxie/vaingogh/repo"
+	"go.stevenxie.me/vaingogh/repo"
 
-	"github.com/stevenxie/api/pkg/zero"
+	"go.stevenxie.me/api/pkg/zero"
 
 	"github.com/cockroachdb/errors"
 	"github.com/google/go-github/v27/github"

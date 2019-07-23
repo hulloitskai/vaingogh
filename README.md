@@ -73,9 +73,9 @@ $ docker run \
 [tag-img]: https://img.shields.io/github/tag/stevenxie/vaingogh.svg
 [drone]: https://ci.stevenxie.me/stevenxie/vaingogh
 [drone-img]: https://ci.stevenxie.me/api/badges/stevenxie/vaingogh/status.svg
-[grp]: https://goreportcard.com/report/github.com/stevenxie/vaingogh
-[grp-img]: https://goreportcard.com/badge/github.com/stevenxie/vaingogh
-[godoc]: https://godoc.org/github.com/stevenxie/vaingogh
-[godoc-img]: https://godoc.org/github.com/stevenxie/vaingogh?status.svg
+[grp]: https://goreportcard.com/report/go.stevenxie.me/vaingogh
+[grp-img]: https://goreportcard.com/badge/go.stevenxie.me/vaingogh
+[godoc]: https://godoc.org/go.stevenxie.me/vaingogh
+[godoc-img]: https://godoc.org/go.stevenxie.me/vaingogh?status.svg
 [microbadger]: https://microbadger.com/images/stevenxie/vaingogh
 [microbadger-img]: https://images.microbadger.com/badges/image/stevenxie/vaingogh.svg

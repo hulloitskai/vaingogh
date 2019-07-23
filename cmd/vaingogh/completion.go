@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/stevenxie/vaingogh/internal/info"
+	"go.stevenxie.me/vaingogh/internal/info"
 )
 
 // completionCmd represents the completion command

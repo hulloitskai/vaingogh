@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cockroachdb/errors"
-	"github.com/stevenxie/vaingogh/template"
+	"go.stevenxie.me/vaingogh/template"
 )
 
 const defaultBaseURL = "https://github.com"

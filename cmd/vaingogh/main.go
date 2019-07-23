@@ -5,8 +5,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/stevenxie/api/pkg/cmdutil"
-	"github.com/stevenxie/vaingogh/internal/info"
+	"go.stevenxie.me/api/pkg/cmdutil"
+	"go.stevenxie.me/vaingogh/internal/info"
 )
 
 var (

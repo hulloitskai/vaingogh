@@ -6,9 +6,9 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/stevenxie/vaingogh/config"
-	"github.com/stevenxie/vaingogh/repo"
-	"github.com/stevenxie/vaingogh/repo/github"
+	"go.stevenxie.me/vaingogh/config"
+	"go.stevenxie.me/vaingogh/repo"
+	"go.stevenxie.me/vaingogh/repo/github"
 )
 
 var reposCmd = &cobra.Command{

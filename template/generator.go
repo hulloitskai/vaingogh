@@ -3,7 +3,7 @@ package template
 import (
 	"strings"
 
-	"github.com/stevenxie/vaingogh/pkg/urlutil"
+	"go.stevenxie.me/vaingogh/pkg/urlutil"
 )
 
 // An Generator can generate an vanity imports HTML page.

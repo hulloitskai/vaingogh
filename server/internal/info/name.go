@@ -1,7 +1,7 @@
 package info
 
 import (
-	"github.com/stevenxie/vaingogh/internal/info"
+	"go.stevenxie.me/vaingogh/internal/info"
 )
 
 // Name is the server name, used for identification purposes.

@@ -10,8 +10,8 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stevenxie/vaingogh/internal/info"
-	serverinfo "github.com/stevenxie/vaingogh/server/internal/info"
+	"go.stevenxie.me/vaingogh/internal/info"
+	serverinfo "go.stevenxie.me/vaingogh/server/internal/info"
 )
 
 func (srv *Server) handler(log logrus.FieldLogger) http.HandlerFunc {
