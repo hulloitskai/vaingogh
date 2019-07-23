@@ -83,7 +83,7 @@ func execServe(*cobra.Command, []string) error {
 			return errors.Wrap(err, "creating GitHub client")
 		}
 
-		// Init service using GitHub client.
+		// Create lister using GitHub client.
 		cfg := cfg.Lister
 		lister = repogh.NewLister(
 			client,

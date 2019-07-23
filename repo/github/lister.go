@@ -24,7 +24,7 @@ type (
 		isOrg   bool
 	}
 
-	// A ListerConfig configures a Service.
+	// A ListerConfig configures a Lister.
 	ListerConfig struct {
 		Concurrency int
 	}
@@ -32,7 +32,7 @@ type (
 
 var _ repo.ListerService = (*Lister)(nil)
 
-// NewLister creates a new Service that lists repositories for the
+// NewLister creates a new Lister that lists repositories for the
 // specified user.
 func NewLister(
 	c *github.Client,

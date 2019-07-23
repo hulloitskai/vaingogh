@@ -38,15 +38,14 @@ EOF
 
 # Run the server.
 $ docker run \
-    --rm \
+    --rm -d \
     -v $(PWD)/config.yaml:/etc/vaingogh/config.yaml \
     -p 3000:3000 \
+    --name vaingogh \
     stevenxie/vaingogh
 
 # Try loading a repo page!
 $ curl http://localhost:3000/vaingogh
-
-# (response)
 <!DOCTYPE html>
 <html>
   <head>
@@ -59,6 +58,9 @@ $ curl http://localhost:3000/vaingogh
     Nothing to see here; <a href="https://godoc.org/localhost:3000/vaingogh">move along</a>.
   </body>
 </html>
+
+# Stop the server.
+$ docker stop vaingogh
 ```
 
 Of course, none of these imports will actually work until you run this on an
