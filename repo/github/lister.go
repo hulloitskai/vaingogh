@@ -2,14 +2,15 @@ package github
 
 import (
 	"context"
-
-	"go.stevenxie.me/vaingogh/repo"
-
-	"go.stevenxie.me/api/pkg/zero"
+	"fmt"
 
 	"github.com/cockroachdb/errors"
 	"github.com/google/go-github/v27/github"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/semaphore"
+
+	"go.stevenxie.me/api/pkg/zero"
+	"go.stevenxie.me/vaingogh/repo"
 )
 
 type (
@@ -58,6 +59,7 @@ func (l *Lister) ListGoRepos() ([]string, error) {
 		return nil, errors.Wrap(err, "github: checking user type")
 	}
 
+	// List all repos by l.user.
 	var (
 		repos []*github.Repository
 		err   error
@@ -83,64 +85,74 @@ func (l *Lister) ListGoRepos() ([]string, error) {
 		return nil, err
 	}
 
-	// Init channels.
+	// Prepare to consolidate async work results.
 	var (
-		jobs    = make(chan *github.Repository)
-		results = make(chan langCheckResult)
+		results = make(chan string)
+		gorepos = make([]string, 0, len(repos))
+		done    = make(chan zero.Struct)
 	)
-
-	// Start min(len(repos), rl.concurrency) workers.
-	var (
-		numWorkers      = l.concurrency
-		group, groupctx = errgroup.WithContext(context.Background())
-	)
-	if len(repos) < numWorkers {
-		numWorkers = len(repos)
-	}
-	for i := 0; i < numWorkers; i++ {
-		group.Go(func() error {
-			return l.langCheckWorker(groupctx, jobs, results)
-		})
-	}
-
-	// Prepare to collect results into names.
-	var (
-		names    = make([]string, 0, len(repos))
-		done     = make(chan zero.Struct)
-		nresults int
-	)
-	go func(results <-chan langCheckResult, done chan<- zero.Struct) {
+	go func(results <-chan string, done chan<- zero.Struct) {
 		for result := range results {
-			nresults++
-			if result.HasGo {
-				names = append(names, result.Repo.GetFullName())
-			}
+			gorepos = append(gorepos, result)
 		}
 		done <- zero.Empty()
 	}(results, done)
 
-	// Pass repos to language-check workers. This will block if there are fewer
-	// workers than repos.
-	for _, repo := range repos {
-		jobs <- repo
+	// Create semaphore with a maximum weight of min(len(repos), rl.concurrency).
+	numWorkers := l.concurrency
+	if len(repos) < numWorkers {
+		numWorkers = len(repos)
 	}
-	close(jobs)
+	var (
+		sem             = semaphore.NewWeighted(int64(numWorkers))
+		group, groupctx = errgroup.WithContext(context.Background())
+	)
+	for _, repo := range repos {
+		// Wait until a semaphore is acquired.
+		if err = sem.Acquire(groupctx, 1); err != nil {
+			return nil, errors.Wrap(err, "acquiring semaphore")
+		}
 
-	// Wait for workers to finish.
+		// Check repo languages to see if it contains 'Go'.
+		func(repo *github.Repository, svc *github.RepositoriesService) {
+			group.Go(func() error {
+				defer sem.Release(1)
+
+				// Make request with groupctx, so that it will be cancelled if the group
+				// is cancelled.
+				languages, _, err := svc.ListLanguages(
+					groupctx,
+					repo.GetOwner().GetLogin(),
+					repo.GetName(),
+				)
+				if err != nil {
+					return errors.Wrapf(err, "listing languages for '%s'",
+						repo.GetFullName())
+				}
+
+				// Send repo name to results channel if it language analysis results
+				// contain 'Go'.
+				if _, ok := languages["Go"]; ok {
+					results <- repo.GetFullName()
+				}
+				return nil
+			})
+		}(repo, l.client.Repositories)
+	}
+
+	// Wait for errgroup to finish.
 	if err = group.Wait(); err != nil {
 		return nil, errors.Wrap(err, "github: checking languages")
 	}
 	close(results)
 
-	// Wait for results to finish collecting.
+	// Wait for results to finish consolidating.
 	<-done
 
-	// Ensure all jobs were accounted for.
-	if nresults != len(repos) {
-		return nil, errors.Newf(
-			"github: requested language checks for %d repos, but got %d results",
-			len(repos), nresults,
-		)
-	}
-	return names, nil
+	return gorepos, nil
+}
+
+// DeriveRepoFullName derives the full name of a repo from a partial name.
+func (l *Lister) DeriveRepoFullName(partial string) (repo string) {
+	return fmt.Sprintf("%s/%s", l.user, partial)
 }
